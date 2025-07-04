@@ -4,7 +4,7 @@ export default async function handler(req, res) {
 
   const clientId = "1390626260056674366";
   const clientSecret = "hL-Ji669_YHUf7ICB91PazHBrBeU0_eA";
-  const redirectUri = "https://your-vercel-project.vercel.app/api/callback";
+  const redirectUri = "https://restorecord-three.vercel.app/api/callback";
 
   const params = new URLSearchParams();
   params.append("client_id", clientId);
