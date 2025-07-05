@@ -65,7 +65,7 @@ module.exports = async function handler(req, res) {
     }),
   }).catch(console.error);
 
-  await fetch("https://SilentMinorBase.lokdsnk.repl.co/grant-role", {
+  await fetch("https://myproject-bvb7.onrender.com/grant-role", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userData.id }),
