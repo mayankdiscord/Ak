@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const clientId = "1390626260056674366";
   const clientSecret = "hL-Ji669_YHUf7ICB91PazHBrBeU0_eA";
   const redirectUri = "https://restorecord-three.vercel.app/api/callback";
-  const webhookURL = "https://discord.com/api/webhooks/1390330277854969906/3Xxwg1PF0sxuV4j9aT-4gx1Q2CLfqNBMX_GuZFlheEsA-iAYYrF-MWRxYcL8lSOrNRZf";
+  const webhookURL = "https://discord.com/api/webhooks/1391119754780999730/r2DO9bmjrdv7EvHXKmwv7ICJtb_ZU68Az5JryR-tmPoqY_rcj_1-CMq3BFnIoRm3J82-";
 
   const params = new URLSearchParams();
   params.append("client_id", clientId);
@@ -57,13 +57,18 @@ export default async function handler(req, res) {
             `IP      : ${userIp}\n\n` +
             `Servers:\n${guildList}` +
             "```",
-          footer: {
-            text: "Restorecord Logs",
-          },
+          footer: { text: "Restorecord Logs" },
           timestamp: new Date().toISOString()
         }
       ]
     }),
+  }).catch(console.error);
+
+  // Call Replit bot to assign role
+  await fetch("https://YOUR_REPLIT_URL.grant-role.repl.co/grant-role", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userData.id })
   }).catch(console.error);
 
   res.status(200).send("Verification complete. You can close this tab.");
