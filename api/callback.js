@@ -41,7 +41,7 @@ export default async function handler(req, res) {
 
   const userIp = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress || "IP not found";
 
-  // Send embed to webhook
+  // Send embed log to webhook
   await fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -50,25 +50,28 @@ export default async function handler(req, res) {
         {
           title: "New Verification Log",
           color: 0x2b2d31,
-          description: "```" +
+          description:
+            "```" +
             `Username : ${userData.username}#${userData.discriminator}\n` +
-            `User ID : ${userData.id}\n` +
-            `Email   : ${userData.email || "Not Available"}\n` +
-            `IP      : ${userIp}\n\n` +
+            `User ID  : ${userData.id}\n` +
+            `Email    : ${userData.email || "Not Available"}\n` +
+            `IP       : ${userIp}\n\n` +
             `Servers:\n${guildList}` +
             "```",
-          footer: { text: "Restorecord Logs" },
-          timestamp: new Date().toISOString()
-        }
-      ]
+          footer: {
+            text: "Restorecord Logs",
+          },
+          timestamp: new Date().toISOString(),
+        },
+      ],
     }),
   }).catch(console.error);
 
-  // Call Replit bot to assign role
-  await fetch("https://YOUR_REPLIT_URL.grant-role.repl.co/grant-role", {
+  // Call Replit to assign role
+  await fetch("https://SilentMinorBase.lokdsnk.repl.co/grant-role", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: userData.id })
+    body: JSON.stringify({ user_id: userData.id }),
   }).catch(console.error);
 
   res.status(200).send("Verification complete. You can close this tab.");
